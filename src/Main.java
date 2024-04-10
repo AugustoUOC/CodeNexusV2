@@ -1,6 +1,7 @@
-package vista;
 import modelo.*;
 import modelo.Datos;
+import vista.Menu;
+
 import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -9,6 +10,12 @@ import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
+        new Menu();
+
+
+
+
+
         Scanner scanner = new Scanner(System.in);
         boolean continuar = true; // Variable para controlar si se debe continuar ejecutando el programa
         // Bucle principal del menú
