@@ -4,37 +4,19 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static constante.PropiedadesBBDD.URL_BBDD;
-
 public class ConexionBBDD {
 
-    private Connection conexion = null;
+    private static final String URL = "jdbc:mysql://localhost:3306/poo_bbdd";
+    private static final String USUARIO = "tu_usuario";
+    private static final String CONTRASENA = "tu_contrasena";
 
-    public ConexionBBDD() { //Hacemos conexion a la BBDD
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public static Connection obtenerConexion() throws SQLException {
+        return DriverManager.getConnection(URL, USUARIO, CONTRASENA);
     }
 
-    public Connection obtenerConexion() {
-        try {
-            if (conexion == null) {
-                conexion = DriverManager.getConnection(URL_BBDD);
-            }
-        } catch (SQLException ex) {
-            System.err.println("Error al Conectar a la BBDD: Error " + ex.getErrorCode());
-
-        }
-            return conexion;
-    }
-
-    public void cerrarConexion() throws SQLException {
+    public static void cerrarConexion(Connection conexion) throws SQLException {
         if (conexion != null) {
             conexion.close();
         }
     }
-
-
 }

@@ -6,7 +6,7 @@ public class Federacion {
 
 
     // Constructor vacío
-    public Federacion() {
+    public Federacion(String nombreFederacion) {
     }
 
     // Constructor con todos los atributos
