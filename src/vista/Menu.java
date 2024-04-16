@@ -1,8 +1,12 @@
 package vista;
 
+import modelo.Datos;
 import modelo.Excursion;
+import utilidad.ConexionBBDD;
 import utilidad.Teclado;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,9 +16,14 @@ import static utilidad.Teclado.pedirInt;
 
 public class Menu {
 
-    public Menu() {}
+    private Connection conexion;
 
-    private void menuPrincipal(){
+    public Menu() {
+    }
+
+    public void menuPrincipal() throws ParseException, SQLException {
+
+
         boolean finalizarPrograma = false;
         System.out.println("Bienvenido");
         while (!finalizarPrograma) {
@@ -51,7 +60,7 @@ public class Menu {
 
     }
 
-    private void menuExcursiones() {
+    public void menuExcursiones() throws ParseException, SQLException {
         boolean salirMenuExcursiones = false;
         System.out.println("\n-------------------------------------------------------");
         System.out.println("     Entrando al menú de la gestión de excursiones");
@@ -66,26 +75,11 @@ public class Menu {
 
             switch (opcion) {
                 case 1:
-                    Excursion excursion = new Excursion();
-                    excursion.setDescripcion(Teclado.pedirString("Descripcion de la Excursion: "));
-                    Date fechaExcursion = null;
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                    while (fechaExcursion == null) {
-                        try {
-                            fechaExcursion = dateFormat.parse(Teclado.pedirString("Ingrese la fecha de la excursión (formato: dd/MM/yyyy):"));
-                            excursion.setFechaExcursion(fechaExcursion);
-                        } catch (ParseException e) {
-                            System.out.println("Formato de fecha incorrecto. Intente nuevamente.");
-                        }
-                    }
-                    excursion.setDuracionDias(Teclado.pedirInt("Ingrese la duración en días de la excursión:"));
-                    excursion.setPrecioInscripcion(Teclado.pedirDouble("Ingrese el precio de inscripción:"));
-                   // pendiente a que este la BBDD System.out.println("\n------------------------------------------");
-                   // System.out.println("     Excursión agregada correctamente");
-                   // System.out.println("------------------------------------------\n\n" + excursion + "\n");
+                    Datos.crearExcursion();
                     break;
                 case 2:
                     // hay que cambiar la funcion para mostrar inscripciones cuando ya este la base de datos creada.
+                    Datos.mostrarExcursionesPorFechas();
                     break;
                 case 3:
                     salirMenuExcursiones = true;

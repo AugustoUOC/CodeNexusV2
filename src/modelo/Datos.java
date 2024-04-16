@@ -1,5 +1,10 @@
 package modelo;
 
+
+import modelo.dao.ExcursionDAO;
+import utilidad.*;
+
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7,6 +12,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Calendar;
+
+
 
 public class Datos {
 
@@ -27,62 +34,54 @@ public class Datos {
 
     //Métodos para excursiones
     public static void crearExcursion() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Ingrese la descripción de la excursión:");
-        String descripcion = scanner.nextLine();
-
-        System.out.println("Ingrese la fecha de la excursión (formato: dd/MM/yyyy):");
+        Excursion excursion = new Excursion();
+        excursion.setDescripcion(Teclado.pedirString("Descripción de la Excursión: "));
         Date fechaExcursion = null;
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         while (fechaExcursion == null) {
             try {
-                fechaExcursion = dateFormat.parse(scanner.nextLine());
+                fechaExcursion = dateFormat.parse(Teclado.pedirString("Ingrese la fecha de la excursión (formato: dd/MM/yyyy):"));
+                excursion.setFechaExcursion(fechaExcursion);
             } catch (ParseException e) {
                 System.out.println("Formato de fecha incorrecto. Intente nuevamente.");
             }
         }
-
-        System.out.println("Ingrese la duración en días de la excursión:");
-        int duracionDias = scanner.nextInt();
-
-        System.out.println("Ingrese el precio de inscripción:");
-        double precioInscripcion = scanner.nextDouble();
-
-        Excursion excursion = new Excursion(++contadorExcursiones, descripcion, fechaExcursion, duracionDias, precioInscripcion);
-        listaExcursiones.add(excursion);
-        System.out.println("\n------------------------------------------");
-        System.out.println("     Excursión agregada correctamente");
-        System.out.println("------------------------------------------\n\n" + excursion + "\n");
+        excursion.setDuracionDias(Teclado.pedirInt("Ingrese la duración en días de la excursión:"));
+        excursion.setPrecioInscripcion(Teclado.pedirDouble("Ingrese el precio de inscripción:"));
+        ExcursionDAO excursionDAO = new ExcursionDAO();
+        excursionDAO.agregarExcursion(excursion);
     }
-    public static void mostrarExcursionesPorFechas(List<Excursion> listaExcursiones) {
-        Scanner scanner = new Scanner(System.in);
+
+
+    public static void borrarExcursion() {
+
+        int idExcursionAEliminar = Teclado.pedirInt("Inserta el ID de la Excursion que quieres eliminar");
+        ExcursionDAO excursionDAO = new ExcursionDAO();
+        excursionDAO.eliminarExcursion(idExcursionAEliminar);
+        boolean exito = excursionDAO.eliminarExcursion(idExcursionAEliminar);
+
+        if (exito) {
+            System.out.println("La excursión ha sido eliminada exitosamente.");
+        } else {
+            System.out.println("Hubo un error al eliminar la excursión.");
+        }
+
+    }
+
+    public static void mostrarExcursionesPorFechas() throws ParseException, SQLException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
-        System.out.println("Ingrese la fecha de inicio (dd/MM/yyyy): ");
-        Date fechaInicio = leerFecha(scanner, dateFormat);
-
-        System.out.println("Ingrese la fecha de fin (dd/MM/yyyy): ");
-        Date fechaFin = leerFecha(scanner, dateFormat);
-
+        Date fechaInicio = dateFormat.parse(Teclado.pedirString("Ingrese la fecha de inicio (dd/MM/yyyy): "));
+        Date fechaFin = dateFormat.parse(Teclado.pedirString("Ingrese la fecha de fin (dd/MM/yyyy): "));
         if (fechaInicio.after(fechaFin)) {
             System.out.println("La fecha de inicio no puede ser posterior a la fecha de fin.");
             return;
         }
-        System.out.println("\n----------------------------------------------------");
-        System.out.println("     Excursiones entre " + dateFormat.format(fechaInicio) + " y " + dateFormat.format(fechaFin) + ":");
-        System.out.println("----------------------------------------------------\n");
-        boolean excursionesEncontradas = false;
-        for (Excursion excursion : listaExcursiones) {
-            Date fechaExcursion = excursion.getFechaExcursion();
-            if ((fechaExcursion.after(fechaInicio) && fechaExcursion.before(fechaFin)) || (fechaExcursion.equals(fechaInicio) && fechaExcursion.before(fechaFin)) || (fechaExcursion.after(fechaInicio) && fechaExcursion.equals(fechaFin)))   {
-                System.out.println(excursion);
-                excursionesEncontradas = true;
-            }
+        // Convierte java.util.Date a java.sql.Date
+        java.sql.Date fechaInicioSQL = new java.sql.Date(fechaInicio.getTime());
+        java.sql.Date fechaFinSQL = new java.sql.Date(fechaFin.getTime());
 
-        }
-        if (!excursionesEncontradas) {
-            System.out.println("No se encontraron excursiones en el rango de fechas especificado.\n");
-        }
+        ExcursionDAO excursionDAO = new ExcursionDAO();
+        excursionDAO.obtenerExcursiones(fechaInicioSQL, fechaFinSQL);
     }
 
    //Subfunción de mostrarExcursionesPorFechas
@@ -915,7 +914,7 @@ public class Datos {
                 if (numeroExcursionElegida == contadorExcursion) {
                     continuarExcursion = false;
                     // Agregar una nueva excursión
-                    Datos.crearExcursion();
+                    //Datos.crearExcursion();
                     excursionElegida = listaExcursiones.get(listaExcursiones.size() - 1);
                     numeroExcursionElegida = excursionElegida.getIdExcursion(); // Obtener la ID de la nueva excursión
                     break;

@@ -1,13 +1,22 @@
 package vista;
 
-import utilidad.ConexionBBDD;
+import modelo.dao.ExcursionDAO;
 
-import java.sql.Connection;
 
-import static utilidad.Teclado.pedirString;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 public class Test {
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws ParseException, SQLException {
+
+        Menu menu = new Menu();
+        menu.menuPrincipal();
+
+
 
 
 

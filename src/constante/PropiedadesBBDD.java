@@ -6,7 +6,7 @@ public class PropiedadesBBDD {
 
     private static final String PASSWORD = "123456"; // Cualquiera, lo suyo seria mejorarla por seguridad
 
-    // HAY QUE CAMBIAR LA DIRECCION DE LA BASE DE DATOS DONTE "TEST" ES EL NOMBRE QUE LE PONGA A LA MISMA
+
     public static final String URL_BBDD = "jdbc:mysql://localhost:3306/poo_bbdd?user=" + USUARIO + "&password=" + PASSWORD;
 
 }

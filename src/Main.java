@@ -2,6 +2,9 @@ import modelo.*;
 import modelo.Datos;
 import vista.Menu;
 
+
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -9,8 +12,8 @@ import java.util.Date;
 
 
 public class Main {
-    public static void main(String[] args) {
-        new Menu();
+    public static void main(String[] args) throws ParseException, SQLException {
+
 
 
 
@@ -45,7 +48,7 @@ public class Main {
                         scanner.nextLine();
                         switch (opcionExcursion) {
                             case 1:
-                                Datos.crearExcursion();
+
                                 System.out.println("¿Quieres realizar alguna otra gestión de las excursiones?");
                                 System.out.println("1. Si");
                                 System.out.println("2. No");
@@ -61,7 +64,7 @@ public class Main {
                                 }
                                 break;
                             case 2:
-                                Datos.mostrarExcursionesPorFechas(Datos.listaExcursiones);
+                                Datos.mostrarExcursionesPorFechas();
                                 System.out.println("¿Quieres realizar alguna otra gestión de las excursiones?");
                                 System.out.println("1. Si");
                                 System.out.println("2. No");

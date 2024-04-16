@@ -1,5 +1,8 @@
 package utilidad;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 public class Teclado {
@@ -23,5 +26,6 @@ public class Teclado {
         System.out.print(mensaje);
         return scanner.nextDouble();
     }
+
 
 }
