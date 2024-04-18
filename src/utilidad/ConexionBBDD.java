@@ -27,13 +27,14 @@ public class ConexionBBDD {
         return conexion;
     }
 
-    public void cerrarConexion() {
-        try {
-            if (conexion != null) {
+    public void cerrarConexion(Connection conexion) {
+        if (conexion != null) {
+            try {
                 conexion.close();
+                System.out.println("Conexión cerrada correctamente.");
+            } catch (SQLException ex) {
+                System.err.println("Error al cerrar la conexión: " + ex.getMessage());
             }
-        } catch (SQLException ex) {
-            System.err.println("Error al Cerrar la conexion");
         }
     }
 

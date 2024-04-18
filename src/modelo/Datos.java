@@ -1,7 +1,7 @@
 package modelo;
 
 
-import modelo.dao.ExcursionDAO;
+import modelo.dao.*;
 import utilidad.*;
 
 import java.sql.SQLException;
@@ -81,419 +81,120 @@ public class Datos {
         java.sql.Date fechaFinSQL = new java.sql.Date(fechaFin.getTime());
 
         ExcursionDAO excursionDAO = new ExcursionDAO();
-        excursionDAO.obtenerExcursiones(fechaInicioSQL, fechaFinSQL);
+        ArrayList<Excursion> listaExcursiones = excursionDAO.obtenerListaExcursiones(fechaInicioSQL, fechaFinSQL);
+        excursionDAO.mostrarListaExcursiones(listaExcursiones);
     }
 
-   //Subfunción de mostrarExcursionesPorFechas
-    private static Date leerFecha(Scanner scanner, SimpleDateFormat dateFormat) {
-        Date fecha = null;
-        boolean fechaValida = false;
-        while (!fechaValida) {
-            try {
-                String fechaStr = scanner.nextLine();
-                fecha = dateFormat.parse(fechaStr);
-                fechaValida = true;
-            } catch (Exception e) {
-                System.out.println("Formato de fecha inválido. Ingrese la fecha en formato dd/MM/yyyy: ");
-            }
-        }
-        return fecha;
-    }
+     //Métodos para Socios
+    public static void borrarSocio() throws SQLException {
+        int idSocioABorrar = Teclado.pedirInt("Inserta el ID del Socio que quieres eliminar: ");
+        SociosDAO sociosDAO = new SociosDAO();
+        boolean exito = sociosDAO.eliminarSocioPorId(idSocioABorrar);
 
-
-    //Métodos para Socios
-    public static void borrarSocio(List<Socio> socios, List<Inscripcion> listaInscripciones) {
-        if (socios.isEmpty()) {
-            System.out.println("No hay ningún socio agregado para eliminar.\n");
-            return;
-        }
-        boolean continuarBorrado = true;
-        Socio socioAEliminar = null;
-        // Mostrar lista de socios con números asociados
-        System.out.println("La lista de socios que hay agregados es:");
-        int contadorBorrado = 1;
-        while (continuarBorrado) {
-            for (int i = 0; i < socios.size(); i++) {
-                System.out.println((i + 1) + ". " + socios.get(i).getNombre());
-            }
-            // Pedir al usuario que elija un número de socio para eliminar
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Ingrese el número de socio que desea eliminar: ");
-            int opcion = scanner.nextInt();
-
-            if (opcion < 1 || opcion > socios.size()) {
-                if (contadorBorrado < 2) {
-                    System.out.println("\n----------------------------------");
-                    System.out.println("     Esta opción no es válida");
-                    System.out.println("----------------------------------\n");
-                    System.out.println("Lleva " + contadorBorrado + " de 3 intentos.\n");
-                    System.out.println("Introduzca un número de socio de la lista.");
-                    contadorBorrado = contadorBorrado + 1;
-                } else if (contadorBorrado == 2) {
-                    System.out.println("\n----------------------------------");
-                    System.out.println("     Esta opción no es válida");
-                    System.out.println("----------------------------------\n");
-                    System.out.println("Lleva " + contadorBorrado + " de 3 intentos.");
-                    System.out.println("Al próximo error, se detendrá la posibilidad de borrar un socio.\n");
-                    System.out.println("Introduzca un número de socio de la lista.");
-                    contadorBorrado = contadorBorrado + 1;
-                } else {
-                    System.out.println("\n----------------------------------");
-                    System.out.println("     Esta opción no es válida");
-                    System.out.println("----------------------------------\n");
-                    System.out.println("Ha consumido las tres posibilidades de elección de socio.");
-                    System.out.println("Se ha detenido la posibilidad de eliminar un socio.\n");
-                    continuarBorrado = false;
-                    return;
-                }
-            } else {
-                // Eliminar el socio seleccionado
-                socioAEliminar = socios.get(opcion - 1);
-                continuarBorrado = false;
-            }
-        }
-        //Confirmamos si ha hecho alguna excursion
-        boolean confirmacion = true;
-        for (Inscripcion inscripcion : listaInscripciones) {
-            if (inscripcion.getIdSocio() == socioAEliminar.getIdSocio()) {
-                confirmacion = false; // El socio participó en esta excursión
-                break;
-            }
-        }
-
-        if (confirmacion) {
-            socios.remove(socioAEliminar);
-            System.out.println("\n----------------------------------------------------");
-            System.out.println("     Número de socio " + socioAEliminar.getIdSocio() + " eliminado correctamente");
-            System.out.println("----------------------------------------------------\n\n" );
+        if (exito) {
+            System.out.println("El Socio ha sido borrado correctamente.");
         } else {
-            System.out.println("\nEste socio ha participado en alguna excursión, por eso no puede ser borrado.\n");
+            System.out.println("Hubo un error al eliminar el Socio.");
         }
-    }
-    public static void crearSocio() {
 
-        Socio nuevoSocio = null; // Inicialización por defecto
-        Scanner scanner = new Scanner(System.in);
-        boolean continuarTipo = true;
-        System.out.println("Ingrese el nombre del nuevo socio:");
-        String nombre = scanner.nextLine();
+    }
+    public static void crearSocio() throws SQLException {
+        Socio nuevoSocio = null;
+        SociosDAO sociosDAO = new SociosDAO();
+        Seguro seguroElegido;
+
+        String nombre = Teclado.pedirString("Ingrese el nombre del nuevo socio: ");
         System.out.println("Seleccione el tipo de socio:");
-        int contadorTipo = 1;
-        double precioSeguro = 0;
-        var tipoSocio = "1";
         System.out.println("1. Socio Estandar\n2. Socio Federado\n3. Socio Infantil");
-        while (continuarTipo) {
-            if (contadorTipo <= 3){
-                tipoSocio = scanner.nextLine();
-            } else {
-                tipoSocio = "1";
-            }
-            switch (tipoSocio.toLowerCase()) {
-                case "1":
-                    continuarTipo = false;
-                    boolean continuarSeguro = true;
-                    System.out.println("Ingrese el NIF del socio:");
-                    String nifEstandar = scanner.nextLine();
-                    System.out.println("Seleccione el tipo de seguro:");
-                    boolean seguro = false;
-                    int contadorSeguro = 1;
-                    while (continuarSeguro) {
-                        System.out.println("1. Básico");
-                        System.out.println("2. Completo");
-                        int opcionSeguro = scanner.nextInt();
-                        scanner.nextLine(); // Limpiar el buffer del scanner
-                        switch (opcionSeguro) {
-                            case 1:
-                                continuarSeguro = false;
-                                System.out.println("Se ha seleccionado el seguro básico.");
-                                precioSeguro = 10;
-                                break;
-                            case 2:
-                                seguro = true;
-                                continuarSeguro = false;
-                                System.out.println("Se ha seleccionado el seguro completo.");
-                                precioSeguro = 20;
-                                break;
-                            default:
-                                if (contadorSeguro < 2) {
-                                    System.out.println("\n----------------------------------");
-                                    System.out.println("     Esta opción no es válida");
-                                    System.out.println("----------------------------------\n");
-                                    System.out.println("Lleva " + contadorSeguro + " de 3 intentos.\n");
-                                    System.out.println("Introduzca un tipo de seguro válido.");
-                                    contadorSeguro = contadorSeguro + 1;
-                                } else if (contadorSeguro == 2) {
-                                    System.out.println("\n----------------------------------");
-                                    System.out.println("     Esta opción no es válida");
-                                    System.out.println("----------------------------------\n");
-                                    System.out.println("Lleva " + contadorSeguro + " de 3 intentos.");
-                                    System.out.println("Al próximo error, se le asignará el seguro básico por defecto.\n");
-                                    System.out.println("Introduzca un tipo de seguro válido.");
-                                    contadorSeguro = contadorSeguro + 1;
-                                } else {
-                                    System.out.println("\n----------------------------------");
-                                    System.out.println("     Esta opción no es válida");
-                                    System.out.println("----------------------------------\n");
-                                    System.out.println("Ha consumido las tres posibilidades de elección de seguro.\n");
-                                    System.out.println("Se ha asignado el seguro básico por defecto.");
-                                    precioSeguro = 10;
-                                    continuarSeguro = false;
-                                }
-                                break;
-                        }
-                    }
-                    Seguro seguroEstandar = new Seguro(seguro, precioSeguro);
-                    nuevoSocio = new Estandar(++contadorSocios, nombre, nifEstandar, seguroEstandar);
-                    break;
-                case "2":
-                    continuarTipo = false;
-                    System.out.println("Ingrese el NIF del socio:");
-                    String nifFederado = scanner.nextLine();
-                    System.out.println("Ingrese el nombre de la federación:");
-                    String nombreFederacion = scanner.nextLine();
-                    Federacion federacion = new Federacion(++contadorFederaciones, nombreFederacion);
-                    nuevoSocio = new Federado(++contadorSocios, nombre, federacion, nifFederado);
-                    break;
-                case "3":
-                    continuarTipo = false;
-                    boolean continuarBusqueda = true;
-                    System.out.println("Elige el ID del tutor:");
-                    String nombreTutor = "";
-                    int contadorBusqueda = 1;
-                    int idTutor = 0;
-                    Socio tutor = null;
-                    while (continuarBusqueda) {
-                        for (int i = 0; i < listaSocios.size(); i++) {
-                            System.out.println((i + 1) + ". " + listaSocios.get(i).getNombre());
-                        }
+        int tipoSocio = Teclado.pedirInt("Ingrese la opción deseada: ");
+        String nif;
 
-                        idTutor = scanner.nextInt();
-                        if (idTutor < 1 || idTutor > listaSocios.size()) {
-                            if (contadorBusqueda < 2) {
-                                System.out.println("\nNúmero de socio para ser tutor no válido.");
-                                System.out.println("Lleva " + contadorBusqueda + " de 3 intentos.\n");
-                                System.out.println("Introduzca un número de socio de la lista:");
-                                contadorBusqueda = contadorBusqueda + 1;
-                            } else if (contadorBusqueda == 2) {
-                                System.out.println("\nNúmero de socio para ser tutor no válido.");
-                                System.out.println("Lleva " + contadorBusqueda + " de 3 intentos.");
-                                System.out.println("Al próximo error, se detendrá la posibilidad de elegir un tutor para el socio infantil.\n");
-                                System.out.println("Introduzca un número de socio de la lista:");
-                                contadorBusqueda = contadorBusqueda + 1;
-                            } else {
-                                System.out.println("\nHa consumido las tres posibilidades de elección de socio para tutor.");
-                                System.out.println("Se ha detenido la búsqueda de un tutor y por tanto no se ha creado el socio infantil.\n");
-                                continuarBusqueda = false;
-                            }
-                        } else {
-                            continuarBusqueda = false;
-                            for (Socio s : listaSocios) {
-                                if (s.getIdSocio() == idTutor) {
-                                    tutor = s;
-                                    nombreTutor = s.getNombre();
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    // Verifica si se encontró al tutor
-                    boolean continuarConfirmacion = true;
-                    if (tutor != null) {
-                        // Pregunta al usuario si el tutor encontrado es el correcto
-                        System.out.println("\nEl id: " + tutor.getIdSocio() + ", está asociado al socio " + tutor.getTipoSocio() + " que se llama: " + nombreTutor + ".");
-                        System.out.println("\n¿Es este el tutor que desea asociar al socio infantil que se llama " + nombre + "? ");
-                        int contadorConfirmacion = 1;
-                        while (continuarConfirmacion) {
-                            System.out.println("1. Si");
-                            System.out.println("2. No");
-
-                            int opcionconfirmacion = scanner.nextInt();
-                            scanner.nextLine(); // Limpiar el buffer del scanner
-                            switch (opcionconfirmacion) {
-                                case 1:
-                                    nuevoSocio = new Infantil(++contadorSocios, nombre, idTutor);
-                                    continuarConfirmacion = false;
-                                    break;
-                                case 2:
-                                    continuarConfirmacion = false;
-                                    System.out.println("El socio llamado " + tutor.getNombre() + " con número de socio " + tutor.getIdSocio() + ", no se ha asociado como tutor al socio infantil.");
-                                    System.out.println("\n--------------------------------------");
-                                    System.out.println("     El socio no ha sido agregado");
-                                    System.out.println("--------------------------------------\n");
-                                    System.out.println("\n------------------------------------------------");
-                                    System.out.println("     Volviendo al menú de gestión de socios");
-                                    System.out.println("------------------------------------------------\n");
-                                    break;
-                                default:
-                                    if (contadorConfirmacion < 2) {
-                                        System.out.println("\n----------------------------------");
-                                        System.out.println("     Esta opción no es válida");
-                                        System.out.println("----------------------------------\n");
-                                        System.out.println("Lleva " + contadorConfirmacion + " de 3 intentos.\n");
-                                        System.out.println("¿Es este el tutor que desea asociar al socio infantil que se llama " + nombre + "?");
-                                        contadorConfirmacion = contadorConfirmacion + 1;
-                                    } else if (contadorConfirmacion == 2) {
-                                        System.out.println("\n----------------------------------");
-                                        System.out.println("     Esta opción no es válida");
-                                        System.out.println("----------------------------------\n");;
-                                        System.out.println("Lleva " + contadorConfirmacion + " de 3 intentos.");
-                                        System.out.println("Al próximo error, se le asignará el socio Estándar por defecto.\n");
-                                        System.out.println("¿Es este el tutor que desea asociar al socio infantil que se llama " + nombre + "?");
-                                        contadorConfirmacion = contadorConfirmacion + 1;
-                                    } else {
-                                        System.out.println("\n----------------------------------");
-                                        System.out.println("     Esta opción no es válida");
-                                        System.out.println("----------------------------------\n");
-                                        System.out.println("Ha consumido las tres posibilidades de confirmación.");
-                                        System.out.println("No se ha creado el nuevo socio.\n");
-                                        continuarConfirmacion = false;
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    if (contadorTipo < 2) {
-                        System.out.println("\n----------------------------------");
-                        System.out.println("     Esta opción no es válida");
-                        System.out.println("----------------------------------\n");
-                        System.out.println("Lleva " + contadorTipo + " de 3 intentos.\n");
-                        System.out.println("Introduzca un tipo de socio válido:");
-                        contadorTipo = contadorTipo + 1;
-                        System.out.println("1. Socio Estandar\n2. Socio Federado\n3. Socio Infantil");
-                    } else if (contadorTipo == 2) {
-                        System.out.println("\n----------------------------------");
-                        System.out.println("     Esta opción no es válida");
-                        System.out.println("----------------------------------\n");;
-                        System.out.println("Lleva " + contadorTipo + " de 3 intentos.");
-                        System.out.println("Al próximo error, se le asignará el socio Estándar por defecto.\n");
-                        System.out.println("Introduzca un tipo de socio válido:");
-                        contadorTipo = contadorTipo + 1;
-                        System.out.println("1. Socio Estandar\n2. Socio Federado\n3. Socio Infantil");
-                    } else {
-                        System.out.println("\n----------------------------------");
-                        System.out.println("     Esta opción no es válida");
-                        System.out.println("----------------------------------\n");
-                        System.out.println("Ha consumido las tres posibilidades de elección de socio.");
-                        System.out.println("Se ha asignado el socio Estándar por defecto.\n");
-                        contadorTipo = contadorTipo + 1;
-                    }
-
-            }
+        switch (tipoSocio) {
+            case 1:
+                nif = Teclado.pedirString("Ingrese el NIF del socio: ");
+                int opcionSeguro = Teclado.pedirInt("Seleccione el tipo de seguro:\n1. Básico - $10\n2. Completo - $20\nIngrese la opción deseada: ");
+                seguroElegido = sociosDAO.obtenerSeguro(opcionSeguro == 1 ? 1 : 2);  // Asumiendo que los ID de seguros son 1 y 2 en la DB
+                nuevoSocio = new Estandar(0, nombre, nif, seguroElegido);
+                break;
+            case 2:
+                nif = Teclado.pedirString("Ingrese el NIF del socio: ");
+                String nombreFederacion = Teclado.pedirString("Ingrese el nombre de la federación: ");
+                Federacion federacion = sociosDAO.obtenerFederacionPorNombre(nombreFederacion);
+                nuevoSocio = new Federado(0, nombre, federacion, nif);
+                break;
+            case 3:
+                int idTutor = Teclado.pedirInt("Elige el ID del tutor: ");
+                Socio tutor = sociosDAO.buscarSocioPorId(idTutor);
+                if (tutor != null && Teclado.pedirInt("El tutor seleccionado es: " + tutor.getNombre() + " (ID: " + tutor.getIdSocio() + ")\n1. Confirmar tutor\n2. Cancelar\nIngrese la opción deseada: ") == 1) {
+                    nuevoSocio = new Infantil(0, nombre, tutor.getIdSocio());
+                } else {
+                    System.out.println("Creación de socio infantil cancelada o no se encontró un tutor con el ID proporcionado.");
+                }
+                break;
+            default:
+                System.out.println("Opción no válida. Por favor, reintente.");
+                return;
         }
+
         if (nuevoSocio != null) {
-            listaSocios.add(nuevoSocio);
-            System.out.println("\n--------------------------------------");
-            System.out.println("     Socio agregado correctamente");
-            System.out.println("--------------------------------------\n\n" + nuevoSocio + "\n");
+            sociosDAO.agregarSocio(nuevoSocio);
+
+        } else {
+            System.out.println("No se ha podido agregar el Socio");
         }
     }
-    public static void modificarSeguro() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Ingrese el ID del socio estándar para modificar su seguro:");
-        int idSocio = scanner.nextInt();
-        scanner.nextLine();
 
-        Socio socio = obtenerSocioPorId(idSocio, listaSocios);
-        if (socio == null) {
-            System.out.println("No se ha encontrado ningún socio con el ID introducido.\n");
-            return;
-        }
 
-        // Verificar si el socio es de tipo estándar
-        if (socio instanceof Estandar socioEstandar) {
-            // Mostrar el seguro actual del socio
-            String tipoSeguro = "Básico";
-            String tipoComtrario = "Completo";
-            double precioBasico = 10;
-            double precioCompleto = 20;
-            double precioSeguro = socioEstandar.getSeguroContratado().getPrecio();
-            double precioContrario = 20;
-            if (socioEstandar.getSeguroContratado().tipo) {
-                tipoSeguro = "Completo";
-                tipoComtrario = "Básico";
-                precioContrario = precioBasico;
-            } else {
-                tipoSeguro = "Básico";
-                tipoComtrario = "Completo";
-            }
-            System.out.println("El id " + idSocio + " pertenece al socio que se llama " + socioEstandar.getNombre() + ".");
-            System.out.println("Su seguro actual es: " + tipoSeguro + ".");
-            boolean cambiarTipoSeguro = true;
-            System.out.println("\n¿Quieres cambiar el seguro de " + tipoSeguro + " a " + tipoComtrario + "?");
-            int contadorCambio = 1;
-            while (cambiarTipoSeguro) {
-                System.out.println("1. Si");
-                System.out.println("2. No");
-                int opcionSeguro = scanner.nextInt();
-                scanner.nextLine();
-                // Asignar el nuevo seguro al socio
-                switch (opcionSeguro) {
-                    case 1:
-                        if (!socioEstandar.getSeguroContratado().tipo) {
-                            socioEstandar.getSeguroContratado().tipo = !socioEstandar.getSeguroContratado().tipo;
-                            socioEstandar.getSeguroContratado().precio = precioContrario;
-                            System.out.println("\nSe ha cambiado el tipo de seguro del socio llamado " + socioEstandar.getNombre() + " con número de socio " + idSocio + ".");
-                            System.out.println("El nuevo seguro es: " + tipoComtrario + " y su precio son: " + precioContrario + " euros.\n");
-                        } else {
-                            socioEstandar.getSeguroContratado().tipo = !socioEstandar.getSeguroContratado().tipo;
-                            socioEstandar.getSeguroContratado().precio = precioContrario;
-                            System.out.println("\nSe ha cambiado el tipo de seguro del socio llamado " + socioEstandar.getNombre() + " con número de socio " + idSocio + ".");
-                            System.out.println("El nuevo seguro es: " + tipoComtrario + " y su precio son: " + precioContrario + " euros.\n");
-                        }
-                        cambiarTipoSeguro = false;
-                        break;
-                    case 2:
-                        System.out.println("\nNo se ha cambiado el tipo de seguro del socio llamado " + socioEstandar.getNombre() + " con número de socio " + idSocio + ".");
-                        System.out.println("Sigue siendo tipo " + tipoSeguro + ".\n");
-                        cambiarTipoSeguro = false;
-                        break;
-                    default:
-                        if (contadorCambio < 2) {
-                            System.out.println("\n----------------------------------");
-                            System.out.println("     Esta opción no es válida");
-                            System.out.println("----------------------------------\n");
-                            System.out.println("Lleva " + contadorCambio + " de 3 intentos.\n");
-                            System.out.println("¿Quieres cambiar el seguro de " + tipoSeguro + " a " + tipoComtrario + "?");
-                            contadorCambio = contadorCambio + 1;
-                        } else if (contadorCambio == 2) {
-                            System.out.println("\n----------------------------------");
-                            System.out.println("     Esta opción no es válida");
-                            System.out.println("----------------------------------\n");
-                            System.out.println("Lleva " + contadorCambio + " de 3 intentos.");
-                            System.out.println("Al próximo error, se le mantendrá el mismo tipo de seguro.\n");
-                            System.out.println("¿Quieres cambiar el seguro de " + tipoSeguro + " a " + tipoComtrario + "?");
-                            contadorCambio = contadorCambio + 1;
-                        } else {
-                            System.out.println("\n----------------------------------");
-                            System.out.println("     Esta opción no es válida");
-                            System.out.println("----------------------------------\n");
-                            System.out.println("Ha consumido las tres posibilidades para el cambio de seguro.");
-                            System.out.println("No se ha cambiado el tipo de seguro del socio llamado " + socioEstandar.getNombre() + " con número de socio " + idSocio + ".\n");
-                            cambiarTipoSeguro = false;
-                            break;
-                        }
+    public static void modificarSeguro(int idSocio) throws SQLException {
+        SociosDAO sociosDAO = new SociosDAO();
+        Socio socio = sociosDAO.buscarSocioPorId(idSocio);
+        if (socio instanceof Estandar) {
+            Estandar estandar = (Estandar) socio;
+            Seguro seguroActual = estandar.getSeguroContratado();
+            System.out.println(seguroActual);
+            if (seguroActual != null) {
+                System.out.println("El socio es del tipo Estandar con seguro actual: " + seguroActual.getTipo());
+                // Determinamos el nuevo seguro basandonos en el actual que posee el socio indicado
+                int nuevoIdSeguro = seguroActual.getIdSeguro() == 1 ? 2 : 1;
+                String nuevoNombreSeguro = nuevoIdSeguro == 1 ? "Básico" : "Completo";
+                double nuevoPrecio = nuevoIdSeguro == 1 ? 10 : 20;
+                if (Teclado.confirmarAccion("¿Desea cambiar al seguro " + nuevoNombreSeguro + " que vale $" + nuevoPrecio + "?")) {
+                    estandar.setSeguroContratado(new Seguro(nuevoIdSeguro, nuevoNombreSeguro, nuevoPrecio));
+                    sociosDAO.actualizarSeguroDeSocio(estandar);
+                    System.out.println("Seguro cambiado al seguro " + nuevoNombreSeguro);
+                } else {
+                    System.out.println("Cambio de seguro cancelado.");
                 }
+            } else {
+                System.out.println("Este socio Estandar no tiene un seguro configurado actualmente.");
             }
         } else {
-            System.out.println("El socio no es de tipo estándar. No se puede modificar el seguro.");
+            System.out.println("El socio con ID " + idSocio + " no es un socio Estandar.");
         }
     }
-    public static void mostrarSocio(List<Socio> socios) {
-        Scanner scanner = new Scanner(System.in);
+
+
+    public static void mostrarSocios() throws SQLException {
+        SociosDAO sociosDAO = new SociosDAO();
+        ArrayList<Socio> listaSocios = sociosDAO.obtenerListaSocios();
+        sociosDAO.mostrarListaSocios(listaSocios);
+    }
+
+    public static void mostrarSociosPorTipo() {
+
+
+    }
+
+/*    public static void mostrarSocio() {
         boolean continuarMuestreo = true;
         int contadorMuestreo = 1;
         boolean continuarMuestreoTipo = true;
         int contadorMuestreoTipo = 1;
-        System.out.println("¿Qué listado de socios quieres?");
-
         while (continuarMuestreo) {
+            int opcion = Teclado.pedirInt("¿Qué listado de socios quieres?");
             System.out.println("1. Mostrar todos los socios");
             System.out.println("2. Mostrar socios por tipo");
             System.out.println("0. Volver al menú anterior");
-            int opcion = scanner.nextInt();
-            scanner.nextLine(); // Consumir el salto de línea
 
             switch (opcion) {
                 case 1:
@@ -634,7 +335,7 @@ public class Datos {
             }
 
         }
-    }
+    }*/
     //Funcion para mostrar el Importe total de la Factura segun el Socio y las excursiones que tiene asignadas
     public static void mostrarFacturaTotal(List<Socio> listaSocios, List<Excursion> listaExcursiones, List<Inscripcion> listaInscripciones) {
         Scanner scanner = new Scanner(System.in);
@@ -764,7 +465,7 @@ public class Datos {
             if (numeroSocioElegido == contadorSociosInscripcion) {
                 continuarSocio = false;
                 // Agregar un nuevo socio
-                Datos.crearSocio();
+                //Datos.crearSocio();
                 socioElegido = listaSocios.get(listaSocios.size() - 1);
                 numeroSocioElegido = socioElegido.getIdSocio(); // Obtener el ID del nuevo socio
                 break;
@@ -1072,11 +773,11 @@ public class Datos {
                     break;
                 case 3:
                     continuarMuestreo = false;
-                    mostrarInscripcionPorFecha(listaInscripciones, listaSocios, listaExcursiones);
+                   // mostrarInscripcionPorFecha(listaInscripciones, listaSocios, listaExcursiones);
                     break;
                 case 4:
                     continuarMuestreo = false;
-                    mostrarInscripcionPorSocioYFecha(listaInscripciones, listaSocios, listaExcursiones);
+                    //mostrarInscripcionPorSocioYFecha(listaInscripciones, listaSocios, listaExcursiones);
                     break;
                 case 0:
                     continuarMuestreo = false;
@@ -1205,7 +906,7 @@ public class Datos {
         }
         }
     }
-    //Mostrarporfechas
+    /*Mostrarporfechas
     public static void mostrarInscripcionPorFecha(List<Inscripcion> listaInscripciones, List<Socio> listaSocios, List<Excursion> listaExcursiones) {
 
         Scanner scanner = new Scanner(System.in);
@@ -1340,7 +1041,7 @@ public class Datos {
 
         }
 
-    }
+    }*/
     //Subfunciones
     private static Excursion obtenerExcursionPorId(int idExcursion, List<Excursion> listaExcursiones) {
         for (Excursion excursion : listaExcursiones) {

@@ -4,9 +4,7 @@ import utilidad.*;
 import modelo.*;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ExcursionDAO {
 
@@ -35,7 +33,7 @@ public class ExcursionDAO {
             System.out.println("Error al insertar la excursión: " + e.getMessage());
         }
 
-        bdd.cerrarConexion();
+        bdd.cerrarConexion(conexion);
 
     }
 
@@ -58,17 +56,18 @@ public class ExcursionDAO {
             System.out.println("Error al eliminar la excursión: " + e.getMessage());
             return false;
         } finally {
-            bdd.cerrarConexion();
+            bdd.cerrarConexion(conexion);
         }
     }
 
 
-    public ArrayList<Excursion> obtenerExcursiones (Date fechaInicio, Date fechaFin) {
+    public ArrayList<Excursion> obtenerListaExcursiones(Date fechaInicio, Date fechaFin) {
         conexion = bdd.obtenerConexion();
         ArrayList<Excursion> listaExcursiones = new ArrayList<Excursion>();
         String sql = "SELECT * FROM excursion WHERE fechaExcursion BETWEEN ? AND ? ORDER BY fechaExcursion";
         try (PreparedStatement statement = conexion.prepareStatement(sql)){
-            statement.executeQuery(); // problema aquiii
+            statement.setDate(1, new java.sql.Date(fechaInicio.getTime()));
+            statement.setDate(2, new java.sql.Date(fechaFin.getTime()));
             ResultSet resultado = statement.executeQuery();
             while (resultado.next()) {
                 Excursion aux = new Excursion();
@@ -82,9 +81,25 @@ public class ExcursionDAO {
         } catch (SQLException e) {
             System.out.println("Error al Mostrar la excursión: " + e.getMessage());
         } finally {
-            bdd.cerrarConexion();
+            bdd.cerrarConexion(conexion);
         }
         return listaExcursiones;
     }
+
+    public void mostrarListaExcursiones(ArrayList<Excursion> listaExcursiones) {
+
+        if (!listaExcursiones.isEmpty()) {
+            System.out.println("Lista de Excursiones:");
+            for (Excursion exc : listaExcursiones) {
+                System.out.println("ID: " + exc.getIdExcursion() + ", Descripción: " + exc.getDescripcion() +
+                        ", Fecha: " + exc.getFechaExcursion() + ", Duración (días): " + exc.getDuracionDias() +
+                        ", Precio: $" + exc.getPrecioInscripcion());
+            }
+        } else {
+            System.out.println("No se encontraron excursiones en el rango de fechas indicado.");
+        }
+    }
+
+
 }
 

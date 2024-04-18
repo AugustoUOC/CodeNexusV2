@@ -16,7 +16,6 @@ import static utilidad.Teclado.pedirInt;
 
 public class Menu {
 
-    private Connection conexion;
 
     public Menu() {
     }
@@ -69,7 +68,7 @@ public class Menu {
         while (!salirMenuExcursiones) {
             System.out.println("1. Añadir excursión");
             System.out.println("2. Mostrar excursiones");
-            System.out.println("0. Volver al menú principal");
+            System.out.println("3. Volver al menú principal");
 
             int opcion = pedirInt("Elige lo que quieres hacer: ");
 
@@ -78,11 +77,13 @@ public class Menu {
                     Datos.crearExcursion();
                     break;
                 case 2:
-                    // hay que cambiar la funcion para mostrar inscripciones cuando ya este la base de datos creada.
                     Datos.mostrarExcursionesPorFechas();
                     break;
                 case 3:
                     salirMenuExcursiones = true;
+                    System.out.println("\n-------------------------------------------------------");
+                    System.out.println("               Saliendo al Menu Principal");
+                    System.out.println("-------------------------------------------------------");
                     break;
                 default:
                     System.out.println("Elige una opcion Valida");
@@ -92,7 +93,7 @@ public class Menu {
 
     }
 
-    private void menuSocios() {
+    private void menuSocios() throws SQLException {
         boolean salirMenuSocios = false;
         System.out.println("\n--------------------------------------------------");
         System.out.println("     Entrando al menú de la gestión de socios");
@@ -110,22 +111,27 @@ public class Menu {
 
             switch (opcion) {
                 case 1:
-                    // hay que refactorizar la funcion añadir socio cuando la base de datos este creada
+                    Datos.crearSocio();
+                    System.out.println("Socio Agregado Correctamente");
                     break;
                 case 2:
-                    // hay que refactorizar la funcion modificarSeguro del socio cuando la base de datos este creada
+                    int idSocio = Teclado.pedirInt("Ingrese el ID del socio cuyo seguro quieres modificar: ");
+                    Datos.modificarSeguro(idSocio);
                     break;
                 case 3:
-                    // hay que refactorizar la funcion EliminarSocio cuando la base de datos este creada
+                    Datos.borrarSocio();
                     break;
                 case 4:
-                    // hay que refactorizar la funcion MostrarSocios cuando la base de datos este creada
+                    Datos.mostrarSocios();
                     break;
                 case 5:
 
                     break;
                 case 6:
                     salirMenuSocios = true;
+                    System.out.println("\n-------------------------------------------------------");
+                    System.out.println("               Saliendo al Menu Principal");
+                    System.out.println("-------------------------------------------------------");
                     break;
                 default:
                     System.out.println("Elige una opcion Valida");

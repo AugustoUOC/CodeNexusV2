@@ -2,7 +2,7 @@ package modelo;
 
 public class Estandar extends Socio {
     private String nif;
-    public Seguro seguroContratado;
+    private Seguro seguroContratado;
 
     // Constructor vacío
     public Estandar() {
@@ -17,6 +17,7 @@ public class Estandar extends Socio {
     }
 
     // Getter y setter para el NIF
+
     public String getNif() {
         return nif;
     }
@@ -25,7 +26,6 @@ public class Estandar extends Socio {
         this.nif = nif;
     }
 
-    // Getter y setter para el seguro contratado
     public Seguro getSeguroContratado() {
         return seguroContratado;
     }
@@ -34,19 +34,12 @@ public class Estandar extends Socio {
         this.seguroContratado = seguroContratado;
     }
 
-    // Método para modificar el seguro contratado
-    public void crearSeguro(Seguro nuevoSeguro) {
-        this.seguroContratado = nuevoSeguro;
-    }
-
-    // Método toString para imprimir los detalles del socio estándar
     @Override
     public String toString() {
-        String tipoSeguro = "básico";
-        if (seguroContratado.tipo) {
-            tipoSeguro = "completo";
-        }
-        return "Socio Estandar con id número: " +getIdSocio() + ", llamado: " +  getNombre() + ", con NIF: " + nif + ".\n" +
-                "Tiene un seguro " +  tipoSeguro + " que vale " + seguroContratado.precio +" euros.";
+        return "Estandar{" +
+                "nif='" + nif + '\'' +
+                ", seguroContratado=" + seguroContratado +
+                ", tipoSocio='" + tipoSocio + '\'' +
+                '}';
     }
 }

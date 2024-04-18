@@ -111,7 +111,7 @@ public class Main {
                             scanner.nextLine();
                             switch (opcionSocio) {
                                 case 1:
-                                    Datos.crearSocio();
+                                    //Datos.crearSocio();
                                     System.out.println("¿Quieres realizar alguna otra gestión de las socios?");
                                     System.out.println("1. Si");
                                     System.out.println("2. No");
@@ -127,7 +127,7 @@ public class Main {
                                     }
                                     break;
                                 case 2:
-                                    Datos.modificarSeguro();
+                                    //Datos.modificarSeguro();
                                     System.out.println("¿Quieres realizar alguna otra gestión de las socios?");
                                     System.out.println("1. Si");
                                     System.out.println("2. No");
@@ -143,7 +143,7 @@ public class Main {
                                     }
                                     break;
                                 case 3:
-                                    Datos.borrarSocio(Datos.listaSocios, Datos.listaInscripciones);
+
                                     System.out.println("¿Quieres realizar alguna otra gestión de las socios?");
                                     System.out.println("1. Si");
                                     System.out.println("2. No");
@@ -159,7 +159,7 @@ public class Main {
                                     }
                                     break;
                                 case 4:
-                                    Datos.mostrarSocio(Datos.listaSocios);
+                                    //Datos.mostrarSocio();
                                     System.out.println("¿Quieres realizar alguna otra gestión de las socios?");
                                     System.out.println("1. Si");
                                     System.out.println("2. No");

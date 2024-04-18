@@ -17,7 +17,7 @@ class DatosTest {
 
     @BeforeEach
     public void setUp() {
-        socioEstandar = new Estandar(1, "Pepe", "2815458W", new Seguro(false, 20));
+        socioEstandar = new Estandar(1, "Pepe", "2815458W", new Seguro("Completo", 20));
         socioFederado = new Federado (2, "Manu", new Federacion(1, "Betica"),"12345678W");
         socioInfantil = new Infantil(3, "Luquitas", 1);
         Inscripcion inscripcion = new Inscripcion(1, 1, 1, new Date());
