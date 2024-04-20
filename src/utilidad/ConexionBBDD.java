@@ -18,7 +18,7 @@ public class ConexionBBDD {
         try {
             if (conexion == null) {
                 conexion = DriverManager.getConnection(URL_BBDD);
-                System.out.println("Te has conectado a la BBDD");
+                //System.out.println("Te has conectado a la BBDD");
             }
         } catch (SQLException ex) {
             System.err.println("Error al Conectar a la BBDD: Error " + ex.getErrorCode());
@@ -31,7 +31,7 @@ public class ConexionBBDD {
         if (conexion != null) {
             try {
                 conexion.close();
-                System.out.println("Conexión cerrada correctamente.");
+                //System.out.println("Conexión cerrada correctamente.");
             } catch (SQLException ex) {
                 System.err.println("Error al cerrar la conexión: " + ex.getMessage());
             }

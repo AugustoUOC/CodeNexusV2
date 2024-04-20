@@ -138,6 +138,8 @@ public class SociosDAO {
 
     public Socio buscarSocioPorId(int idSocio) {
         Socio socio = null;
+        SegurosDAO segurosDAO = new SegurosDAO();
+        FederacionDAO federacionDAO = new FederacionDAO();
         conexion = bdd.obtenerConexion();
         String sql = "SELECT s.idSocio, s.nombre, s.tipoSocio, e.nif, e.seguroContratado, f.idFederacion, i.idTutor " +
                 "FROM socio s " +
@@ -154,11 +156,11 @@ public class SociosDAO {
                 String tipoSocio = rs.getString("tipoSocio");
                 switch (tipoSocio) {
                     case "Estandar":
-                        Seguro seguro = obtenerSeguro(rs.getInt("seguroContratado"));
+                        Seguro seguro = segurosDAO.obtenerSeguro(rs.getInt("seguroContratado"));
                         socio = new Estandar(rs.getInt("idSocio"), rs.getString("nombre"), rs.getString("nif"), seguro);
                         break;
                     case "Federado":
-                        Federacion federacion = obtenerFederacion(rs.getInt("idFederacion"));
+                        Federacion federacion = federacionDAO.obtenerFederacion(rs.getInt("idFederacion"));
                         socio = new Federado(rs.getInt("idSocio"), rs.getString("nombre"), federacion, rs.getString("nif"));
                         break;
                     case "Infantil":
@@ -166,7 +168,6 @@ public class SociosDAO {
                         break;
                 }
             }
-            rs.close();
         } catch (SQLException e) {
             System.out.println("Error al buscar el socio por ID: " + e.getMessage());
         }
@@ -174,97 +175,7 @@ public class SociosDAO {
 
     }
 
-    public Seguro obtenerSeguro(int idSeguro) throws SQLException {
-        Seguro seguro = null;
-        conexion = bdd.obtenerConexion();
-        String sql = "SELECT idSeguro, seguroContratado, precio FROM Seguro WHERE idSeguro = ?";
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idSeguro);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                seguro = new Seguro(rs.getInt("idSeguro"), rs.getString("seguroContratado"), rs.getDouble("precio"));
-            }
-            rs.close();
-        } catch (SQLException e) {
-            System.out.println("Error al buscar el seguro por la ID: " + e.getMessage());
-        }
-        return seguro;
-
-    }
-
-    public void actualizarSeguroDeSocio(Estandar estandar) throws SQLException {
-        String sql = "UPDATE estandar SET seguroContratado = ? WHERE idSocio = ?";
-        try (Connection conexion = bdd.obtenerConexion();
-             PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, estandar.getSeguroContratado().getIdSeguro());
-            stmt.setInt(2, estandar.getIdSocio());
-            int affectedRows = stmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Actualización del seguro fallida, no se modificó ninguna fila.");
-            }
-        }
-    }
-
-
-
-
-    public Federacion obtenerFederacion(int idFederacion) throws SQLException {
-        Federacion federacion = null;
-        String sql = "SELECT idFederacion, nombreFederacion FROM Federacion WHERE idFederacion = ?";
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idFederacion);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                federacion = new Federacion(rs.getInt("idFederacion"), rs.getString("nombreFederacion"));
-            }
-            rs.close();
-        }
-        return federacion;
-    }
-
-    public Federacion obtenerFederacionPorNombre(String nombreFederacion) throws SQLException {
-        Federacion federacion = null;
-        conexion = bdd.obtenerConexion();
-        String sql = "SELECT idFederacion, nombreFederacion FROM Federacion WHERE nombreFederacion = ?";
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setString(1, nombreFederacion);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                federacion = new Federacion(rs.getInt("idFederacion"), rs.getString("nombreFederacion"));
-            } else {
-                if (Teclado.confirmarAccion("Federación no encontrada, ¿desea crear una nueva?")) {
-                    federacion = crearFederacion(nombreFederacion);
-                } else {
-                    System.out.println("Creacion de la Federacion cancelada.");
-                }
-            }
-            rs.close();
-        }
-        return federacion;
-    }
-
-    private Federacion crearFederacion(String nombreFeredarion) throws SQLException {
-        conexion = bdd.obtenerConexion();
-        String insertSql = "INSERT INTO Federacion (nombreFederacion) VALUES (?)";
-        try (PreparedStatement insertStmt = conexion.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
-            insertStmt.setString(1, nombreFeredarion);
-            int affectedRows = insertStmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Crear federación falló, no se insertaron filas.");
-            }
-
-            try (ResultSet generatedKeys = insertStmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int idFederacion = generatedKeys.getInt(1);
-                    return new Federacion(idFederacion, nombreFeredarion);
-                } else {
-                    throw new SQLException("Crear federación falló, no se obtuvo el ID generado.");
-                }
-            }
-        }
-    }
-
-    public ArrayList<Socio> obtenerListaSocios() throws SQLException {
+    public ArrayList<Socio> obtenerListaSocios(){
         conexion = bdd.obtenerConexion();
         ArrayList<Socio> listaSocios = new ArrayList<Socio>();
         String sql = "SELECT * FROM socio";
@@ -286,21 +197,72 @@ public class SociosDAO {
         return listaSocios;
     }
 
-    public ArrayList<Socio> obtenerListaSociosPorTipo() throws SQLException {
+    public ArrayList<Socio> obtenerListaSociosPorTipo(String tipoSocio){
         conexion = bdd.obtenerConexion();
         ArrayList<Socio> listaSocios = new ArrayList<Socio>();
+        String sql = construirConsultaSQL(tipoSocio);
 
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
 
-
-
-
+            ResultSet resultados = sentencia.executeQuery();
+            while (resultados.next()) {
+                Socio socio = crearSocioDesdeResultSet(resultados, tipoSocio);
+                listaSocios.add(socio);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar los socios: " + e.getMessage());
+        }finally {
+            bdd.cerrarConexion(conexion);
+        }
         return listaSocios;
+    }
+
+    private String construirConsultaSQL(String tipoSocio) {
+        switch (tipoSocio) {
+            case "Estandar":
+                return "SELECT s.*, e.nif, sg.idSeguro, sg.seguroContratado, sg.precio FROM Socio s " +
+                        "LEFT JOIN Estandar e ON s.idSocio = e.idSocio " +
+                        "LEFT JOIN Seguro sg ON e.seguroContratado = sg.idSeguro " +
+                        "WHERE s.tipoSocio = 'estandar'";
+            case "Federado":
+                return "SELECT s.*, f.nif, fd.idFederacion, fd.nombreFederacion FROM Socio s " +
+                        "LEFT JOIN Federado f ON s.idSocio = f.idSocio " +
+                        "LEFT JOIN Federacion fd ON f.idFederacion = fd.idFederacion " +
+                        "WHERE s.tipoSocio = 'federado'";
+            case "Infantil":
+                return "SELECT s.*, i.idTutor FROM Socio s " +
+                        "LEFT JOIN Infantil i ON s.idSocio = i.idSocio " +
+                        "WHERE s.tipoSocio = 'infantil'";
+            default:
+                return "";
+        }
+    }
+
+    private Socio crearSocioDesdeResultSet(ResultSet resultados, String tipoSocio) throws SQLException {
+        int idSocio = resultados.getInt("idSocio");
+        String nombre = resultados.getString("nombre");
+
+        switch (tipoSocio) {
+            case "Estandar":
+                String nif = resultados.getString("nif");
+                Seguro seguro = new Seguro(resultados.getInt("idSeguro"), resultados.getString("seguroContratado"), resultados.getDouble("precio"));
+                return new Estandar(idSocio, nombre, nif, seguro);
+            case "Federado":
+                nif = resultados.getString("nif");
+                Federacion federacion = new Federacion(resultados.getInt("idFederacion"), resultados.getString("nombreFederacion"));
+                return new Federado(idSocio, nombre, federacion, nif);
+            case "Infantil":
+                int idTutor = resultados.getInt("idTutor");
+                return new Infantil(idSocio, nombre, idTutor);
+            default:
+                return null;
+        }
     }
 
     public void mostrarListaSocios(ArrayList<Socio> listaSocios) {
 
         if (!listaSocios.isEmpty()) {
-            System.out.println("Lista de Excursiones:");
+            System.out.println("Lista de Socios:");
             for (Socio exc : listaSocios) {
                 System.out.println("ID: " + exc.getIdSocio() + ", Nombre: " + exc.getNombre() +
                         ", Tipo de Socio: " + exc.getTipoSocio());
@@ -309,6 +271,37 @@ public class SociosDAO {
             System.out.println("No se encontraron Socios");
         }
     }
+
+    public void mostrarListaSociosPorTipo(ArrayList<Socio> listaSocios) {
+        if (!listaSocios.isEmpty()) {
+            System.out.println("Lista de Socios:");
+            for (Socio socio : listaSocios) {
+                if (socio != null) {
+                    System.out.println("ID: " + socio.getIdSocio() + ", Nombre: " + socio.getNombre() +
+                            ", Tipo de Socio: " + socio.getTipoSocio());
+
+                    if (socio instanceof Estandar) {
+                        Estandar estandar = (Estandar) socio;
+                        System.out.println("       NIF: " + estandar.getNif() +
+                                ", Seguro: " + (estandar.getSeguroContratado() != null ? estandar.getSeguroContratado().getTipo() : "N/A") +
+                                ", Precio del Seguro: " + (estandar.getSeguroContratado() != null ? estandar.getSeguroContratado().getPrecio() : "N/A"));
+                    } else if (socio instanceof Federado) {
+                        Federado federado = (Federado) socio;
+                        System.out.println("       NIF: " + federado.getNif() +
+                                ", Federación: " + (federado.getFederacion() != null ? federado.getFederacion().getNombre() : "N/A"));
+                    } else if (socio instanceof Infantil) {
+                        Infantil infantil = (Infantil) socio;
+                        System.out.println("       ID Tutor: " + infantil.getIdTutor());
+                    }
+                } else {
+                    System.out.println("Se encontró un socio null en la lista");
+                }
+            }
+        } else {
+            System.out.println("No se encontraron Socios");
+        }
+    }
+
 
 
 }

@@ -27,7 +27,7 @@ public class ExcursionDAO {
 
             int filasInsertadas = statement.executeUpdate();
             if (filasInsertadas > 0) {
-               System.out.println("Excursión agregada correctamente");
+               System.out.println("Excursión agregada correctamente" + "\n");
             }
         } catch (SQLException e) {
             System.out.println("Error al insertar la excursión: " + e.getMessage());
@@ -61,7 +61,7 @@ public class ExcursionDAO {
     }
 
 
-    public ArrayList<Excursion> obtenerListaExcursiones(Date fechaInicio, Date fechaFin) {
+    public ArrayList<Excursion> obtenerListaExcursionesFiltroFecha(Date fechaInicio, Date fechaFin) {
         conexion = bdd.obtenerConexion();
         ArrayList<Excursion> listaExcursiones = new ArrayList<Excursion>();
         String sql = "SELECT * FROM excursion WHERE fechaExcursion BETWEEN ? AND ? ORDER BY fechaExcursion";
@@ -86,6 +86,28 @@ public class ExcursionDAO {
         return listaExcursiones;
     }
 
+    public ArrayList<Excursion> obtenerListaExcursiones(){
+        conexion = bdd.obtenerConexion();
+        ArrayList<Excursion> listaExcursiones = new ArrayList<Excursion>();
+        String sql = "SELECT * FROM excursion";
+        try {
+            PreparedStatement statement = conexion.prepareStatement(sql);
+            ResultSet resultado = statement.executeQuery();
+            while (resultado.next()) {
+                Excursion aux = new Excursion();
+                aux.setIdExcursion(resultado.getInt("idExcursion"));
+                aux.setDescripcion(resultado.getString("descripcion"));
+                aux.setFechaExcursion(resultado.getDate("fechaExcursion"));
+                aux.setDuracionDias(resultado.getInt("duracionDias"));
+                aux.setPrecioInscripcion(resultado.getDouble("precioInscripcion"));
+                listaExcursiones.add(aux);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al Mostrar la excursión: " + e.getMessage());
+        }
+        return listaExcursiones;
+    }
+
     public void mostrarListaExcursiones(ArrayList<Excursion> listaExcursiones) {
 
         if (!listaExcursiones.isEmpty()) {
@@ -100,6 +122,30 @@ public class ExcursionDAO {
         }
     }
 
+    public Excursion buscarExcursionPorId(int idExcursion){
+        Excursion excursion = null;
+        conexion = bdd.obtenerConexion();
+        String sql = "SELECT * FROM excursion WHERE idExcursion = ?";
+        try {
+            PreparedStatement stmt = conexion.prepareStatement(sql);
+                stmt.setInt(1, idExcursion);
+                ResultSet resultado = stmt.executeQuery();
+            if (resultado.next()) {
+                excursion = new Excursion(
+                        resultado.getInt("idExcursion"),
+                        resultado.getString("descripcion"),
+                        resultado.getDate("fechaExcursion"),
+                        resultado.getInt("duracionDias"),
+                        resultado.getDouble("precioInscripcion")
+                );
+            }
+        }catch (SQLException e){
+            System.err.println("No existe la ID de Excursion indicada: " + e.getMessage());
+        }finally {
+            bdd.cerrarConexion(conexion);
+        }
+        return excursion;
+    }
 
 }
 

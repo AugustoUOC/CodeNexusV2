@@ -3,9 +3,9 @@ package utilidad;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Teclado {
@@ -42,5 +42,6 @@ public class Teclado {
             System.out.println("Te has equivocado prueba otra vez");
         }
     }
+
 
 }
