@@ -1,8 +1,12 @@
 package vista;
 
+import modelo.Datos;
 import modelo.Excursion;
+import utilidad.ConexionBBDD;
 import utilidad.Teclado;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,9 +16,13 @@ import static utilidad.Teclado.pedirInt;
 
 public class Menu {
 
-    public Menu() {}
 
-    private void menuPrincipal(){
+    public Menu() {
+    }
+
+    public void menuPrincipal() throws ParseException, SQLException {
+
+
         boolean finalizarPrograma = false;
         System.out.println("Bienvenido");
         while (!finalizarPrograma) {
@@ -51,7 +59,7 @@ public class Menu {
 
     }
 
-    private void menuExcursiones() {
+    public void menuExcursiones() throws ParseException, SQLException {
         boolean salirMenuExcursiones = false;
         System.out.println("\n-------------------------------------------------------");
         System.out.println("     Entrando al menú de la gestión de excursiones");
@@ -60,35 +68,22 @@ public class Menu {
         while (!salirMenuExcursiones) {
             System.out.println("1. Añadir excursión");
             System.out.println("2. Mostrar excursiones");
-            System.out.println("0. Volver al menú principal");
+            System.out.println("3. Volver al menú principal");
 
             int opcion = pedirInt("Elige lo que quieres hacer: ");
 
             switch (opcion) {
                 case 1:
-                    Excursion excursion = new Excursion();
-                    excursion.setDescripcion(Teclado.pedirString("Descripcion de la Excursion: "));
-                    Date fechaExcursion = null;
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                    while (fechaExcursion == null) {
-                        try {
-                            fechaExcursion = dateFormat.parse(Teclado.pedirString("Ingrese la fecha de la excursión (formato: dd/MM/yyyy):"));
-                            excursion.setFechaExcursion(fechaExcursion);
-                        } catch (ParseException e) {
-                            System.out.println("Formato de fecha incorrecto. Intente nuevamente.");
-                        }
-                    }
-                    excursion.setDuracionDias(Teclado.pedirInt("Ingrese la duración en días de la excursión:"));
-                    excursion.setPrecioInscripcion(Teclado.pedirDouble("Ingrese el precio de inscripción:"));
-                   // pendiente a que este la BBDD System.out.println("\n------------------------------------------");
-                   // System.out.println("     Excursión agregada correctamente");
-                   // System.out.println("------------------------------------------\n\n" + excursion + "\n");
+                    Datos.crearExcursion();
                     break;
                 case 2:
-                    // hay que cambiar la funcion para mostrar inscripciones cuando ya este la base de datos creada.
+                    Datos.mostrarExcursionesPorFechas();
                     break;
                 case 3:
                     salirMenuExcursiones = true;
+                    System.out.println("\n-------------------------------------------------------");
+                    System.out.println("               Saliendo al Menu Principal");
+                    System.out.println("-------------------------------------------------------");
                     break;
                 default:
                     System.out.println("Elige una opcion Valida");
@@ -98,7 +93,7 @@ public class Menu {
 
     }
 
-    private void menuSocios() {
+    private void menuSocios() throws SQLException {
         boolean salirMenuSocios = false;
         System.out.println("\n--------------------------------------------------");
         System.out.println("     Entrando al menú de la gestión de socios");
@@ -110,28 +105,52 @@ public class Menu {
             System.out.println("3. Eliminar un socio");
             System.out.println("4. Mostrar los socios");
             System.out.println("5. Mostrar la factura mensual de un socio");
-            System.out.println("0. Volver al menú principal");
+            System.out.println("6. Volver al menú principal");
 
             int opcion = pedirInt("Elige lo que quieres hacer: ");
 
             switch (opcion) {
                 case 1:
-                    // hay que refactorizar la funcion añadir socio cuando la base de datos este creada
+                    Datos.crearSocio();
+                    System.out.println("Socio Agregado Correctamente");
                     break;
                 case 2:
-                    // hay que refactorizar la funcion modificarSeguro del socio cuando la base de datos este creada
+                    int idSocio = Teclado.pedirInt("Ingrese el ID del socio cuyo seguro quieres modificar: ");
+                    Datos.modificarSeguro(idSocio);
                     break;
                 case 3:
-                    // hay que refactorizar la funcion EliminarSocio cuando la base de datos este creada
+                    Datos.borrarSocio();
                     break;
                 case 4:
-                    // hay que refactorizar la funcion MostrarSocios cuando la base de datos este creada
+                    System.out.println("1. Mostrar todos los socios");
+                    System.out.println("2. Mostrar socios por tipo");
+                    System.out.println("3. Volver al menú anterior");
+                    int opcion2 = Teclado.pedirInt("Cual listado de socios quieres elegir: ");
+                    switch (opcion2){
+                        case 1:
+                            Datos.mostrarSocios();
+                            break;
+                        case 2:
+                            Datos.mostrarSociosPorTipo();
+                            break;
+                        case 3:
+                            System.out.println("\n-------------------------------------------------------");
+                            System.out.println("               Volviendo al Menu de Socios");
+                            System.out.println("-------------------------------------------------------");
+                            break;
+                        default:
+                            System.out.println("Elige una opcion Valida");
+                            break;
+                    }
                     break;
                 case 5:
-
+                    Datos.mostrarFacturaTotal();
                     break;
                 case 6:
                     salirMenuSocios = true;
+                    System.out.println("\n-------------------------------------------------------");
+                    System.out.println("               Saliendo al Menu Principal");
+                    System.out.println("-------------------------------------------------------");
                     break;
                 default:
                     System.out.println("Elige una opcion Valida");
@@ -142,8 +161,68 @@ public class Menu {
 
     }
 
-    private void menuInscripciones() {
+    private void menuInscripciones() throws ParseException {
         boolean salirMenuInscripciones = false;
+        System.out.println("\n--------------------------------------------------");
+        System.out.println("   Entrando al menú de la gestión de Inscripciones");
+        System.out.println("--------------------------------------------------");
+        while (!salirMenuInscripciones) {
+            System.out.println("1. Añadir una inscripción");
+            System.out.println("2. Eliminar una inscripción");
+            System.out.println("3. Mostrar las inscripciones");
+            System.out.println("4. Volver al menú principal");
+            int opcion = pedirInt("Elige lo que quieres hacer: ");
+
+            switch (opcion){
+                case 1:
+                    Datos.crearInscripcion();
+                    break;
+                case 2:
+                    Datos.eliminarInscripcion();
+                    break;
+                case 3:
+                    System.out.println("1. No aplicar filtros");
+                    System.out.println("2. Aplicar filtro por socio");
+                    System.out.println("3. Aplicar filtro por fecha");
+                    System.out.println("4. Aplicar ambos filtros");
+                    System.out.println("5. Volver al menú anterior");
+                    int opcion2 = pedirInt("Elige como quieres mostrar las Inscripciones o vuelve al Menu de Inscripciones: ");
+                    switch (opcion2){
+                        case 1:
+                            Datos.mostrarTodasLasInscripciones();
+                            break;
+                        case 2:
+                            Datos.mostrarInscripcionPorSocio();
+                            break;
+                        case 3:
+                            Datos.mostrarInscripcionPorFecha();
+                            break;
+                        case 4:
+                            Datos.mostrarInscripcionPorSocioYFecha();
+                            break;
+                        case 5:
+                            System.out.println("\n-------------------------------------------------------");
+                            System.out.println("           Volviendo al Menu de Inscripciones");
+                            System.out.println("-------------------------------------------------------");
+                            break;
+                        default:
+                            System.out.println("Elige una opcion Valida");
+                            break;
+                    }
+                    break;
+                case 4:
+                    salirMenuInscripciones = true;
+                    System.out.println("\n-------------------------------------------------------");
+                    System.out.println("               Saliendo al Menu Principal");
+                    System.out.println("-------------------------------------------------------");
+                    break;
+                default:
+                    System.out.println("Elige una opcion Valida");
+                    break;
+
+            }
+        }
+
 
     }
 }

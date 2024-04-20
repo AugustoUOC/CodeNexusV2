@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public abstract class Socio {
+public class Socio {
     private int idSocio;
     private String nombre;
     public String tipoSocio;
@@ -18,10 +18,6 @@ public abstract class Socio {
         this.idSocio = idSocio;
         this.nombre = nombre;
         this.tipoSocio = tipoSocio;
-    }
-    public Socio(int idSocio, String nombre) {
-        this.idSocio = idSocio;
-        this.nombre = nombre;
     }
 
     // Getters y setters

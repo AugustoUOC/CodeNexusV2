@@ -11,28 +11,30 @@ public class ConexionBBDD {
     private Connection conexion = null;
 
     public ConexionBBDD() { //Hacemos conexion a la BBDD
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     public Connection obtenerConexion() {
         try {
             if (conexion == null) {
                 conexion = DriverManager.getConnection(URL_BBDD);
+                //System.out.println("Te has conectado a la BBDD");
             }
         } catch (SQLException ex) {
             System.err.println("Error al Conectar a la BBDD: Error " + ex.getErrorCode());
 
         }
-            return conexion;
+        return conexion;
     }
 
-    public void cerrarConexion() throws SQLException {
+    public void cerrarConexion(Connection conexion) {
         if (conexion != null) {
-            conexion.close();
+            try {
+                conexion.close();
+                //System.out.println("Conexión cerrada correctamente.");
+            } catch (SQLException ex) {
+                System.err.println("Error al cerrar la conexión: " + ex.getMessage());
+            }
         }
     }
 

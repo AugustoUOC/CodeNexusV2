@@ -1,25 +1,42 @@
 package modelo;
 
+import java.util.Objects;
+
 public class Seguro {
-    public boolean tipo;
+
+    private int idSeguro;
+    public String tipo;
     public double precio;
 
     // Constructor vacío
     public Seguro() {
+
     }
 
-    // Constructor con todos los atributos
-    public Seguro(boolean tipo, double precio) {
+    public Seguro(int idSeguro, String tipo, double precio) {
+        this.idSeguro = idSeguro;
         this.tipo = tipo;
         this.precio = precio;
     }
 
-    // Getters y setters
-    public boolean isTipo() {
+    public int getIdSeguro() {
+        return idSeguro;
+    }
+
+    public void setIdSeguro(int idSeguro) {
+        this.idSeguro = idSeguro;
+    }
+
+    public Seguro(String tipo, double precio) {
+        this.tipo = tipo;
+        this.precio = precio;
+    }
+
+    public String getTipo() {
         return tipo;
     }
 
-    public void setTipo(boolean tipo) {
+    public void setTipo(String tipo) {
         this.tipo = tipo;
     }
 
@@ -31,11 +48,12 @@ public class Seguro {
         this.precio = precio;
     }
 
-    // Método toString para imprimir los detalles del seguro
     @Override
     public String toString() {
-        return "El seguro es " + (tipo ? "Completo" : "Básico") +
-                "y tiene un precio de " + precio +
-                " euros.";
+        return "Seguro{" +
+                "idSeguro=" + idSeguro +
+                ", tipo='" + tipo + '\'' +
+                ", precio=" + precio +
+                '}';
     }
 }
