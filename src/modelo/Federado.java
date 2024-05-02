@@ -1,21 +1,25 @@
 package modelo;
 
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
+@Entity
 public class Federado extends Socio {
     private String nif;
-    public Federacion federacion;
 
+    @ManyToOne
+    @JoinColumn(name = "federacion_id")
+    private Federacion federacion;
 
-    // Constructor vacío
-    public Federado() {
-    }
+    //Constructor vacío
+    // public Federado() {}
 
     // Constructor con todos los atributos
     public Federado(int idSocio, String nombre, Federacion federacion, String nif) {
         super(idSocio, nombre, "Federado");
         this.federacion = federacion;
         this.nif = nif;
-
     }
 
     // Getter y setter para el NIF
@@ -39,8 +43,10 @@ public class Federado extends Socio {
     // Método toString para imprimir los detalles del socio federado
     @Override
     public String toString() {
-        return "Socio Federado con id número: " +getIdSocio() + ", llamado: " +  getNombre() + ", con NIF: " + nif + ".\n" +
-                "Pertenece a la federación: " +  federacion.getNombre() + ".";
-
+        return "Federado{" +
+                "nif='" + nif + '\'' +
+                ", federacion=" + federacion +
+                ", tipoSocio='" + tipoSocio + '\'' +
+                '}';
     }
 }

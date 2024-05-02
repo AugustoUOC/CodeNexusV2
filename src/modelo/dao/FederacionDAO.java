@@ -1,76 +1,54 @@
 package modelo.dao;
 
 import modelo.Federacion;
-import utilidad.ConexionBBDD;
-import utilidad.Teclado;
 
-import java.sql.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+import java.util.List;
 
 public class FederacionDAO {
 
-
-    private Connection conexion;
-
-    private ConexionBBDD bdd;
+    private final EntityManagerFactory entityManagerFactory;
+    private final EntityManager entityManager;
 
     public FederacionDAO() {
-        bdd = new ConexionBBDD();
+        this.entityManagerFactory = Persistence.createEntityManagerFactory("persistence-unit-name");
+        this.entityManager = entityManagerFactory.createEntityManager();
     }
 
-    public Federacion obtenerFederacion(int idFederacion) throws SQLException {
-        Federacion federacion = null;
-        conexion = bdd.obtenerConexion();
-        String sql = "SELECT idFederacion, nombreFederacion FROM Federacion WHERE idFederacion = ?";
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idFederacion);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                federacion = new Federacion(rs.getInt("idFederacion"), rs.getString("nombreFederacion"));
-            }
+    public Federacion obtenerFederacion(int idFederacion) {
+        return entityManager.find(Federacion.class, idFederacion);
+    }
+
+    public Federacion obtenerFederacionPorNombre(String nombreFederacion) {
+        Query query = entityManager.createQuery("SELECT f FROM Federacion f WHERE f.nombreFederacion = :nombre");
+        query.setParameter("nombre", nombreFederacion);
+        List<Federacion> federaciones = query.getResultList();
+        if (!federaciones.isEmpty()) {
+            return federaciones.get(0);
+        } else {
+            // Aquí puedes manejar el caso de que la federación no exista en la base de datos
+            return null;
         }
+    }
+
+    public Federacion crearFederacion(String nombreFederacion) {
+        EntityTransaction transaction = entityManager.getTransaction();
+        transaction.begin();
+
+        Federacion federacion = new Federacion(nombreFederacion);
+        entityManager.persist(federacion);
+
+        transaction.commit();
+
         return federacion;
     }
 
-    public Federacion obtenerFederacionPorNombre(String nombreFederacion) throws SQLException {
-        Federacion federacion = null;
-        conexion = bdd.obtenerConexion();
-        String sql = "SELECT idFederacion, nombreFederacion FROM Federacion WHERE nombreFederacion = ?";
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setString(1, nombreFederacion);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                federacion = new Federacion(rs.getInt("idFederacion"), rs.getString("nombreFederacion"));
-            } else {
-                if (Teclado.confirmarAccion("Federación no encontrada, ¿desea crear una nueva?")) {
-                    federacion = crearFederacion(nombreFederacion);
-                } else {
-                    System.out.println("Creacion de la Federacion cancelada.");
-                }
-            }
-        }
-        return federacion;
+    public void cerrarConexion() {
+        entityManager.close();
+        entityManagerFactory.close();
     }
-
-    private Federacion crearFederacion(String nombreFeredarion) throws SQLException {
-        conexion = bdd.obtenerConexion();
-        String insertSql = "INSERT INTO Federacion (nombreFederacion) VALUES (?)";
-        try (PreparedStatement insertStmt = conexion.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
-            insertStmt.setString(1, nombreFeredarion);
-            int affectedRows = insertStmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Crear federación falló, no se insertaron filas.");
-            }
-
-            try (ResultSet generatedKeys = insertStmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int idFederacion = generatedKeys.getInt(1);
-                    return new Federacion(idFederacion, nombreFeredarion);
-                } else {
-                    throw new SQLException("Crear federación falló, no se obtuvo el ID generado.");
-                }
-            }
-        }
-    }
-
-
 }

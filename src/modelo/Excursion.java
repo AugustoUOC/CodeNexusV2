@@ -1,30 +1,29 @@
 package modelo;
 
-import java.text.ParseException;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Scanner;
 
+@Entity // Indica que esta clase es una entidad persistente
 public class Excursion {
+    @Id // Indica que este atributo es la clave primaria
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Indica que el valor se generará automáticamente
     private int idExcursion;
     private String descripcion;
     private Date fechaExcursion;
     private int duracionDias;
     private double precioInscripcion;
 
-
-
     // Constructor vacío
     public Excursion() {
     }
 
     // Constructor con todos los atributos
-    public Excursion(int idExcursion, String descripcion, Date fechaExcursion, int duracionDias, double precioInscripcion) {
-        this.idExcursion = idExcursion;
+    public Excursion(String descripcion, Date fechaExcursion, int duracionDias, double precioInscripcion) {
         this.descripcion = descripcion;
-
         this.fechaExcursion = fechaExcursion;
         this.duracionDias = duracionDias;
         this.precioInscripcion = precioInscripcion;
@@ -71,21 +70,14 @@ public class Excursion {
         this.precioInscripcion = precioInscripcion;
     }
 
-
-
-
-
     // Método toString para imprimir los detalles de la excursión
-
     @Override
     public String toString() {
-        //Transformar la fecha al formato deseado para que lo imporima
         SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
         String fechaTransformada = formatoFecha.format(fechaExcursion);
-        return "Excursión con id : " + idExcursion + ".\n" +
-                "Descripción = " + descripcion + ".\n" +
-                "Fecha de la excursión = " + fechaTransformada + ", con una duración de " + duracionDias +" días.\n" +
-                "El precio de inscripción es de " + precioInscripcion +" Euros.\n";
+        return "Excursión con ID: " + idExcursion + ".\n" +
+                "Descripción: " + descripcion + ".\n" +
+                "Fecha de la excursión: " + fechaTransformada + ", duración (días): " + duracionDias + ".\n" +
+                "Precio de inscripción: " + precioInscripcion + " Euros.\n";
     }
-
 }

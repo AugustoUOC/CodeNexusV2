@@ -1,26 +1,31 @@
 package modelo;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Scanner;
 
+@Entity
+@Table(name = "inscripcion")
 public class Inscripcion {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idInscripcion")
     private int idInscripcion;
+
+    @Column(name = "idSocio")
     private int idSocio;
+
+    @Column(name = "idExcursion")
     private int idExcursion;
+
+    @Column(name = "fechaInscripcion")
     private Date fechaInscripcion;
-
-
 
     // Constructor vacío
     public Inscripcion() {
     }
 
     // Constructor con todos los atributos
-    public Inscripcion(int idInscripcion, int idSocio, int idExcursion, Date fechaInscripcion) {
-        this.idInscripcion = idInscripcion;
+    public Inscripcion(int idSocio, int idExcursion, Date fechaInscripcion) {
         this.idSocio = idSocio;
         this.idExcursion = idExcursion;
         this.fechaInscripcion = fechaInscripcion;
@@ -62,10 +67,7 @@ public class Inscripcion {
     // Método toString para imprimir los detalles de la inscripción
     @Override
     public String toString() {
-        SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
-        String fechaTransformada = formatoFecha.format(fechaInscripcion);
-        return "Inscripcion con id número " + idInscripcion + ", realizada el " + fechaTransformada +
-                ".\nAsociada a la excursión número " + idExcursion +" y al socio número " + idSocio + ".";
+        return "Inscripción con ID: " + idInscripcion + ", realizada el " + fechaInscripcion +
+                ", asociada a la excursión con ID: " + idExcursion + " y al socio con ID: " + idSocio + ".";
     }
 }
-

@@ -1,23 +1,26 @@
 package modelo;
 
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
+
+@Entity
 public class Estandar extends Socio {
     private String nif;
+
+    @OneToOne
     private Seguro seguroContratado;
 
     // Constructor vacío
-    public Estandar() {
-    }
+    // public Estandar() {}
 
     // Constructor con todos los atributos
-
-    public Estandar(int idSocio, String nombre, String nif, Seguro seguroContratado) {
-        super(idSocio, nombre , "Estandar");
+    public Estandar(String nombre, String nif, Seguro seguroContratado) {
+        super(nombre, "Estandar");
         this.nif = nif;
         this.seguroContratado = seguroContratado;
     }
 
     // Getter y setter para el NIF
-
     public String getNif() {
         return nif;
     }

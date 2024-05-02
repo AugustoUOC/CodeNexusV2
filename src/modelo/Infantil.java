@@ -1,17 +1,19 @@
 package modelo;
 
-import modelo.Socio;
+import javax.persistence.Entity;
 
+@Entity
 public class Infantil extends Socio {
     private int idTutor;
+
     // Constructor vacío
-    public Infantil() {
-    }
+    // public Infantil() {}
+
     // Constructor con todos los atributos
     public Infantil(int idSocio, String nombre, int idTutor) {
-        super(idSocio, nombre, "Infantil");
+        super(nombre, "Infantil");
+        this.idSocio = idSocio;
         this.idTutor = idTutor;
-
     }
 
     // Getter y setter para el tutor asociado
@@ -28,7 +30,5 @@ public class Infantil extends Socio {
     public String toString() {
         return "Socio Infantil con id número: " + getIdSocio() + ", llamado: " +  getNombre() + ".\n" +
                 "Tiene un tutor asociado con el id número " + idTutor +".";
-
     }
 }
-

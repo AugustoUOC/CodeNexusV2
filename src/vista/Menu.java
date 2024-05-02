@@ -1,16 +1,10 @@
 package vista;
 
 import modelo.Datos;
-import modelo.Excursion;
-import utilidad.ConexionBBDD;
 import utilidad.Teclado;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Scanner;
 
 import static utilidad.Teclado.pedirInt;
 

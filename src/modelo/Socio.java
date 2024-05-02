@@ -1,21 +1,25 @@
 package modelo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import javax.persistence.*;
 
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Socio {
-    private int idSocio;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected int idSocio;
     private String nombre;
-    public String tipoSocio;
-
-    // Constructor vacío
-    public Socio() {
-    }
+    protected String tipoSocio;
 
     // Constructor con todos los atributos
     public Socio(int idSocio, String nombre, String tipoSocio) {
         this.idSocio = idSocio;
+        this.nombre = nombre;
+        this.tipoSocio = tipoSocio;
+    }
+
+    // Constructor con todos los atributos
+    public Socio(String nombre, String tipoSocio) {
         this.nombre = nombre;
         this.tipoSocio = tipoSocio;
     }
@@ -44,7 +48,6 @@ public class Socio {
     public void setTipoSocio(String tipoSocio) {
         this.tipoSocio = tipoSocio;
     }
-
 
     // Método toString para imprimir los detalles del socio
     @Override
